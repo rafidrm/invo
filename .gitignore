@@ -52,6 +52,7 @@ docs/_build/
 
 # Project specific
 tests/
+netflix/ml-20m/
 
 #swapfile
 dfs_portal/models/.mlb.py.swo

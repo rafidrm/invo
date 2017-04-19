@@ -1,0 +1,9 @@
+Notes for Invo project
+
+
+
+
+April 16, 2017
+==============
+I've finished implementing LinearModels.AbsoluteDualityGap and tested it on artificial data. 
+Now I need to test it on movielens//netflix problems. First I need to reproduce the preliminary analysis project.
