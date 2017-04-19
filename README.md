@@ -14,6 +14,10 @@
     
     `$ pip install -r requirements.txt`
 
+    * Remove invo dependency. 
+    * Install numpy/scipy separately if needed.
+    * You can remove dependency on scikit learn safely. 
+
 4. Pip install the package.
 
 
