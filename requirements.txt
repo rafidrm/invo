@@ -9,7 +9,6 @@ docutils==0.13.1
 ecos==2.0.4
 fastcache==1.0.2
 imagesize==0.7.1
--e git+https://github.com/rafidrm/invo.git@207fca12b60276d09172782ab6fe9c52669e2411#egg=invo
 Jinja2==2.9.6
 MarkupSafe==1.0
 matplotlib==2.0.0

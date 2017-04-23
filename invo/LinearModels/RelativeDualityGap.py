@@ -7,7 +7,7 @@ from ..utils.fwdutils import checkFeasibility
 
 
 
-class AbsoluteDualityGap():
+class RelativeDualityGap():
     """ Formulate an Absolute Duality Gap method of generalized linear inverse optimization. 
     """
 
@@ -23,6 +23,8 @@ class AbsoluteDualityGap():
         self.solved = False
         self.error = np.nan
         self.dual = np.nan
+        self.A = np.nan
+        self.b = np.nan
         
         # initialize forward model
         if self._kwargs['forward'] != None:
@@ -43,6 +45,12 @@ class AbsoluteDualityGap():
             self._forward_set = self._fitPolyhedralConstraints(kwargs['A'], kwargs['b'])
         else:
             print ('Could not fit forward model!')
+            sys.exit()
+        
+        # for relative duality gap, need to check if b != 0
+        check_bEqualsZero = ( np.round(self.b - 0, self.tol) == 0 ).all()
+        if check_bEqualsZero:
+            print ('b vector equals 0. Relative duality gap is inappropriate.')
             sys.exit()
         self._forwardModel = True
 
@@ -72,77 +80,66 @@ class AbsoluteDualityGap():
         return True
 
     def solve(self, points):
-        """ 
+        """ Solves a linear program.
+
+            min     sum z_q
+            st      z_q >= e_q - 1
+                    z_q >= 1 - e_q
+                    A'y = c
+                    c'x_q = e_q
+                    b'y = 1
+                    y >= 0
         """
         points = [ np.mat(point).T for point in points ]
         if self._forwardModel == False:
             print('No forward model set.')
             sys.exit()
-        feasible = checkFeasibility(points, self.A, self.b, self.tol)
-        if feasible:
-            self.error = self._solveHyperplaneProjection(points)
-        else:
-            self.error = self._solveBruteForce(points)
+        #feasible = checkFeasibility(points, self.A, self.b, self.tol)
+        self.error = self._solveRelativeDGLP(points)
         return True
 
-    def _solveHyperplaneProjection(self, points):
-        m,n = self.A.shape
-        errors = np.zeros(m)
-        for i in range(m):
-            ai = self.A[i] / np.linalg.norm(self.A[i], np.inf)
-            bi = self.b[i] / np.linalg.norm(self.A[i], np.inf)
-            errors[i] = np.sum([ ai * pt - bi for pt in points ])
-        minInd = np.argmin(errors)
-        self.c = self.A[minInd] / np.linalg.norm(self.A[minInd], np.inf)
-        self.error = errors[minInd]
-        self.dual = np.zeros(m)
-        self.dual[minInd] = 1 / np.linalg.norm(self.A[minInd], np.inf)
-        self.solved = True
-        return errors[minInd] 
+    def _solveRelativeDGLP(self, points):
+        """ Solves a linear program.
 
-    def _solveBruteForce(self, points):
+            min     sum z_q
+            st      z_q >= c'x_q - 1
+                    z_q >= 1 - c'x_q 
+                    A'y = c
+                    b'y = 1
+                    y >= 0
+        """
         m,n = self.A.shape
         nPoints = len(points)
-        nFormulations = 2 ** n - 1
-        bestResult = np.inf
 
-        for formulation in range(nFormulations):
-            binFormulation = format(formulation, '0{}b'.format(n))
-            cSign = [ int(i) for i in binFormulation ]
-            cSign = np.mat(cSign)
-            cSign[cSign == 0] = -1
+        y = cvx.Variable(m)
+        z = cvx.Variable(nPoints)
+        c = cvx.Variable(n)
 
-            y = cvx.Variable(m)
-            z = cvx.Variable(nPoints)
-            c = cvx.Variable(n)
-            obj = cvx.Minimize(sum(z))
-            
-            cons = []
-            cons.append( y >= 0 )
-            cons.append( self.A.T * y == c )
-            cons.append( cSign * c == 1 )
-            for i in range(n):
-                if cSign[0,i] == 1:
-                    cons.append( c[i] >= 0 )
-                else:
-                    cons.append( c[i] <= 0 )
-            for i in range(nPoints):
-                chi = self.A * points[i] - self.b
-                cons.append( z[i] >= y.T * chi )
-                cons.append( z[i] >= -1 * y.T * chi )
-            prob = cvx.Problem(obj, cons)
-            result = prob.solve()
+        #pu.db
+        obj = cvx.Minimize(sum(z))
 
-            if result < bestResult:
-                bestResult = result
-                self.c = c.value / np.linalg.norm(c.value, np.inf)
-                self.dual = y.value / np.linalg.norm(c.value, np.inf)
-        self.solved = True
-        self.error = bestResult
-        self.dual = self.dual.T.tolist()[0] # reconvert to just a list
-        self.c = self.c.T.tolist()[0]
-        return result 
+        cons = []
+        cons.append( y >= 0 )
+        cons.append( self.A.T * y == c )
+        if ( self.b <= 0 ).all():
+            cons.append ( y.T * self.b == -1 )
+        else:
+            cons.append( y.T * self.b == 1 )
+        for i, point in enumerate(points):
+            cons.append( z[i] >= c.T * point - 1 )
+            cons.append( z[i] >= 1 - c.T * point )
         
+        prob = cvx.Problem(obj, cons)
+        result = prob.solve()
+
+        self.c = c.value / np.linalg.norm(c.value, np.inf)
+        self.c = self.c.T.tolist()[0]
+        self.dual = y.value / np.linalg.norm(c.value, np.inf)
+        self.dual = self.dual.T.tolist()[0]
+        self.solved = True
+        self.error = result
+        return result
+
     def _initialize_kwargs(self, kwargs):
         if 'forward' not in kwargs:
             kwargs['forward'] = None
