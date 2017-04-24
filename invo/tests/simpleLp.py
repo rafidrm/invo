@@ -1,9 +1,10 @@
 import numpy as np
 import pudb
 
-from ..LinearModels.AbsoluteDualityGap import AbsoluteDualityGap
-from ..LinearModels.RelativeDualityGap import RelativeDualityGap
-
+#from ..LinearModels.AbsoluteDualityGap import AbsoluteDualityGap
+#from ..LinearModels.RelativeDualityGap import RelativeDualityGap
+from ..LinearModels import AbsoluteDualityGap
+from ..LinearModels import RelativeDualityGap
 
 
 
