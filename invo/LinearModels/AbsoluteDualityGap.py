@@ -3,7 +3,7 @@ import numpy as np
 import pudb
 from scipy.spatial import ConvexHull
 
-from ..utils.fwdutils import checkFeasibility
+from ..utils.invoutils import checkFeasibility
 
 
 

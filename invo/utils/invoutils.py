@@ -3,7 +3,6 @@ import numpy as np
 
 
 
-
 def checkFeasibility(points, A, b, tol=8):
     """ Check if the set of points satisfy A x >= b.
     

@@ -7,7 +7,7 @@ from ..utils.invoutils import checkFeasibility
 
 
 
-class RelativeDualityGap():
+class pNorm():
     """ Formulate an Absolute Duality Gap method of generalized linear inverse optimization. 
     """
 
@@ -18,13 +18,12 @@ class RelativeDualityGap():
             verbose (bool): Sets displays.  Default False. 
         """
         # initialize kwargs
-        self._kwargs = self._initialize_kwargs(kwargs)
         self._forwardModel = False
         self.solved = False
         self.error = np.nan
         self.dual = np.nan
-        self.A = np.nan
-        self.b = np.nan
+        self.p = np.nan
+        self._kwargs = self._initialize_kwargs(kwargs)
         
         # initialize forward model
         if self._kwargs['forward'] != None:
@@ -45,12 +44,6 @@ class RelativeDualityGap():
             self._forward_set = self._fitPolyhedralConstraints(kwargs['A'], kwargs['b'])
         else:
             print ('Could not fit forward model!')
-            sys.exit()
-        
-        # for relative duality gap, need to check if b != 0
-        check_bEqualsZero = ( np.round(self.b - 0, self.tol) == 0 ).all()
-        if check_bEqualsZero:
-            print ('b vector equals 0. Relative duality gap is inappropriate.')
             sys.exit()
         self._forwardModel = True
 
@@ -80,66 +73,42 @@ class RelativeDualityGap():
         return True
 
     def solve(self, points):
-        """ Solves a linear program.
-
-            min     sum z_q
-            st      z_q >= e_q - 1
-                    z_q >= 1 - e_q
-                    A'y = c
-                    c'x_q = e_q
-                    b'y = 1
-                    y >= 0
+        """ 
         """
         points = [ np.mat(point).T for point in points ]
-        if self._forwardModel == False:
-            print('No forward model set.')
-            sys.exit()
-        #feasible = checkFeasibility(points, self.A, self.b, self.tol)
-        self.error = self._solveRelativeDGLP(points)
+        assert self._forwardModel, 'No forward model given.'
+        self.error = self._solveFeasibleProjection(points)
         return True
 
-    def _solveRelativeDGLP(self, points):
-        """ Solves a linear program.
-
-            min     sum z_q
-            st      z_q >= c'x_q - 1
-                    z_q >= 1 - c'x_q 
-                    A'y = c
-                    b'y = 1
-                    y >= 0
-        """
+    def _solveFeasibleProjection(self, points):
         m,n = self.A.shape
         nPoints = len(points)
+        bestResult = np.inf
 
-        y = cvx.Variable(m)
-        z = cvx.Variable(nPoints)
-        c = cvx.Variable(n)
+        for i in range(m):
+            ai = self.A[i]
+            bi = self.b[i]
+            
+            epsilons = [ cvx.Variable(n) for pt in points ]
+            objFunc = []
+            cons = []
+            for x in range(nPoints):
+                objFunc.append( cvx.norm(epsilons[x], self.p) )
+                cons.append( self.A * (points[x] - epsilons[x]) >= self.b )
+                cons.append( ai * (points[x] - epsilons[x]) == bi )
+            obj = cvx.Minimize(sum(objFunc))
+            prob = cvx.Problem(obj, cons)
+            result = prob.solve()
 
-        #pu.db
-        obj = cvx.Minimize(sum(z))
-
-        cons = []
-        cons.append( y >= 0 )
-        cons.append( self.A.T * y == c )
-        if ( self.b <= 0 ).all():
-            cons.append ( y.T * self.b == -1 )
-        else:
-            cons.append( y.T * self.b == 1 )
-        for i, point in enumerate(points):
-            cons.append( z[i] >= c.T * point - 1 )
-            cons.append( z[i] >= 1 - c.T * point )
-        
-        prob = cvx.Problem(obj, cons)
-        result = prob.solve()
-
-        self.c = c.value / np.linalg.norm(c.value, np.inf)
-        self.c = self.c.T.tolist()[0]
-        self.dual = y.value / np.linalg.norm(c.value, np.inf)
-        self.dual = self.dual.T.tolist()[0]
+            if result < bestResult:
+                bestResult = result
+                self.dual = np.zeros(m)
+                self.dual[i] = 1.0 / np.linalg.norm(ai, np.inf)
+                self.c = ai / np.linalg.norm(ai, np.inf)
         self.solved = True
-        self.error = result
-        return result
-
+        self.error = bestResult
+        return result 
+        
     def _initialize_kwargs(self, kwargs):
         if 'forward' not in kwargs:
             kwargs['forward'] = None
@@ -148,7 +117,15 @@ class RelativeDualityGap():
         if 'tol' not in kwargs:
             self.tol = 8 
         else:
+            assert isinstance(kwargs['tol'], int), 'tolerance needs to be an integer.'
             self.tol = kwargs['tol']
+        
+        # class specific kwargs
+        if 'p' not in kwargs:
+            self.p = 2
+        else:
+            assert isinstance(kwargs['p'], int) or kwargs['p'] is 'inf', 'p needs to be an integer'
+            self.p = kwargs['p']
         
         return kwargs
 
