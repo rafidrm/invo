@@ -1,20 +1,18 @@
 import numpy as np
-import pudb
+#import pudb
 
-#from ..LinearModels.AbsoluteDualityGap import AbsoluteDualityGap
-#from ..LinearModels.RelativeDualityGap import RelativeDualityGap
 from ..LinearModels import AbsoluteDualityGap
 from ..LinearModels import RelativeDualityGap
 from ..LinearModels import pNorm
-
+from ..utils.fwdutils import fit_convex_hull
 
 
 def simpleLp(vertices, testPoints, model):
     adg = model 
-    adg.ForwardModel(forward='hull', points=vertices)
+    #adg.ForwardModel(forward='hull', points=vertices)
     adg.solve(testPoints)
     results = {
-            'solved': adg.solved,
+            'solved': adg._solved,
             'cost': adg.c,
             'error': adg.error,
             'dual': adg.dual
@@ -35,6 +33,7 @@ if __name__ == "__main__":
             np.array([0.5, 0.2, 0.3, 0.5]),
             np.array([0.1, 0.5, 0.3, 0.7])
             ]
+    A, b = fit_convex_hull(vertices)
     
     
     
@@ -45,6 +44,7 @@ if __name__ == "__main__":
             np.array([0.1, 0.3, 0.3, 0.5]),
             ]
     model = AbsoluteDualityGap()
+    model.FOP(A, b)
     result = simpleLp(vertices, interiorPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
@@ -56,6 +56,7 @@ if __name__ == "__main__":
             np.array([0.1, 4.2, 1.4, 0.5]),
             ]
     model = AbsoluteDualityGap()
+    model.FOP(A, b)
     result = simpleLp(vertices, mixedPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
@@ -67,6 +68,7 @@ if __name__ == "__main__":
             np.array([0.1, 0.3, 0.3, 0.5]),
             ]
     model = RelativeDualityGap()
+    model.FOP(A, b)
     result = simpleLp(vertices, interiorPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
@@ -78,6 +80,7 @@ if __name__ == "__main__":
             np.array([0.1, 4.2, 1.4, 0.5]),
             ]
     model = RelativeDualityGap()
+    model.FOP(A, b)
     result = simpleLp(vertices, mixedPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
@@ -89,6 +92,7 @@ if __name__ == "__main__":
             np.array([0.1, 0.3, 0.3, 0.5]),
             ]
     model = pNorm(p=2)
+    model.FOP(A, b)
     result = simpleLp(vertices, interiorPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
@@ -100,6 +104,7 @@ if __name__ == "__main__":
             np.array([0.1, 4.2, 1.4, 0.5]),
             ]
     model = pNorm(p=2)
+    model.FOP(A, b)
     result = simpleLp(vertices, mixedPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
