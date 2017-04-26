@@ -41,13 +41,13 @@ class RelativeDualityGap():
         """ Solves the inverse optimization problem, by reformulating it to the
         following LP.
 
-            min     sum z_q
-            st      z_q >= e_q - 1
-                    z_q >= 1 - e_q
-                    A'y = c
-                    c'x_q = e_q
-                    b'y = 1
-                    y >= 0
+        min     sum z_q
+        st      z_q >= e_q - 1
+        z_q >= 1 - e_q
+        A'y = c
+        c'x_q = e_q
+        b'y = 1
+        y >= 0
         """
         points = [ np.mat(point).T for point in points ]
         assert self._fop, 'No forward model given.'
@@ -57,12 +57,12 @@ class RelativeDualityGap():
     def _solveRelativeDGLP(self, points):
         """ Solves a linear program.
 
-            min     sum z_q
-            st      z_q >= c'x_q - 1
-                    z_q >= 1 - c'x_q 
-                    A'y = c
-                    b'y = 1
-                    y >= 0
+            min sum z_q
+            st  [ z_q >= c'x_q - 1
+            z_q >= 1 - c'x_q 
+            A'y = c
+            b'y = 1
+            y >= 0 ]
         """
         m,n = self.A.shape
         nPoints = len(points)
