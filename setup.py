@@ -8,7 +8,7 @@ setup(
         author='Rafid Mahmood',
         author_email='rafid.mahmood@mail.utoronto.ca',
         url='https://github.com/rafidrm/invo',
-        download_url='https://github.com/rafidrm/invo/archive/0.1.tar.gz',
+        download_url='https://github.com/rafidrm/invo/archive/0.2.tar.gz',
         license='MIT',
         packages=['invo', 
             'invo.LinearModels',
