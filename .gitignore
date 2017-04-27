@@ -19,6 +19,7 @@ env/
 *.egg-info/
 .installed.cfg
 *.egg
+dist/
 
 # Installer logs
 pip-log.txt
