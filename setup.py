@@ -10,7 +10,9 @@ setup(
         url='https://github.com/rafidrm/invo',
         download_url='https://github.com/rafidrm/invo/archive/0.1.tar.gz',
         license='MIT',
-        packages=['invo'],
+        packages=['invo', 
+            'invo.LinearModels',
+            'invo.utils'],
         keywords=['optimization','inverse'],
         install_requires=['numpy', 'cvxpy'],
         zip_safe=False)
