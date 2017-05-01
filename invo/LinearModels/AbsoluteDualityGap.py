@@ -56,6 +56,7 @@ class AbsoluteDualityGap():
             errors[i] = np.sum([ ai * pt - bi for pt in points ])
         minInd = np.argmin(errors)
         self.c = self.A[minInd] / np.linalg.norm(self.A[minInd], np.inf)
+        self.c = self.c.tolist()[0]
         self.error = errors[minInd]
         self.dual = np.zeros(m)
         self.dual[minInd] = 1 / np.linalg.norm(self.A[minInd], np.inf)
@@ -97,8 +98,8 @@ class AbsoluteDualityGap():
 
             if result < bestResult:
                 bestResult = result
-                self.c = c.value / np.linalg.norm(c.value, np.inf)
-                self.dual = y.value / np.linalg.norm(c.value, np.inf)
+                self.c = c.value / np.linalg.norm(c.value, 1)
+                self.dual = y.value / np.linalg.norm(c.value, 1)
         self._solved = True
         self.error = bestResult
         self.dual = self.dual.T.tolist()[0] # reconvert to just a list

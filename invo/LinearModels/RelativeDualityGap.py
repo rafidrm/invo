@@ -67,33 +67,51 @@ class RelativeDualityGap():
         m,n = self.A.shape
         nPoints = len(points)
 
-        y = cvx.Variable(m)
-        z = cvx.Variable(nPoints)
-        c = cvx.Variable(n)
+        # first solve the positive variant
+        y1 = cvx.Variable(m)
+        z1 = cvx.Variable(nPoints)
+        c1 = cvx.Variable(n)
+        obj1 = cvx.Minimize(sum(z1))
 
-        #pu.db
-        obj = cvx.Minimize(sum(z))
-
-        cons = []
-        cons.append( y >= 0 )
-        cons.append( self.A.T * y == c )
-        if ( self.b <= 0 ).all():
-            cons.append ( y.T * self.b == -1 )
-        else:
-            cons.append( y.T * self.b == 1 )
+        cons1 = []
+        cons1.append( y1 >= 0 )
+        cons1.append( self.A.T * y1 == c1 )
+        cons1.append( y1.T * self.b == 1 )
         for i, point in enumerate(points):
-            cons.append( z[i] >= c.T * point - 1 )
-            cons.append( z[i] >= 1 - c.T * point )
+            cons1.append( z1[i] >= c1.T * point - 1 )
+            cons1.append( z1[i] >= 1 - c1.T * point )
         
-        prob = cvx.Problem(obj, cons)
-        result = prob.solve()
+        prob1 = cvx.Problem(obj1, cons1)
+        result1 = prob1.solve()
 
-        self.c = c.value / np.linalg.norm(c.value, np.inf)
+        # then solve the negative variant
+        y2 = cvx.Variable(m)
+        z2 = cvx.Variable(nPoints)
+        c2 = cvx.Variable(n)
+        obj2 = cvx.Minimize(sum(z2))
+
+        cons2 = []
+        cons2.append( y2 >= 0 )
+        cons2.append( self.A.T * y2 == c2 )
+        cons2.append( y2.T * self.b == -1 )
+        for i, point in enumerate(points):
+            cons2.append( z2[i] >= c2.T * point + 1 )
+            cons2.append( z2[i] >= -1 - c2.T * point )
+        
+        prob2 = cvx.Problem(obj2, cons2)
+        result2 = prob2.solve()
+
+        if result1 < result2:
+            self.c = c1.value / np.linalg.norm(c1.value, 1)
+            self.dual = y1.value / np.linalg.norm(c1.value, 1)
+        else:
+            self.c = c2.value / np.linalg.norm(c2.value, 1)
+            self.dual = y2.value / np.linalg.norm(c2.value, 1)
+
         self.c = self.c.T.tolist()[0]
-        self.dual = y.value / np.linalg.norm(c.value, np.inf)
         self.dual = self.dual.T.tolist()[0]
         self._solved = True
-        return result
+        return min(result1, result2)
 
     def _initialize_kwargs(self, kwargs):
         if 'verbose' in kwargs:
