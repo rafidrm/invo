@@ -73,7 +73,29 @@ class pNorm():
         self.c = self.c.tolist()[0]
         self.error = bestResult
         return result 
-        
+       
+    def optimal_points(self, points):
+        if self._solved:
+            m,n = self.A.shape
+            ind = np.argmax(self.dual)
+            ai = self.A[ind]
+            bi = self.b[ind]
+            epsilons = [ cvx.Variable(n) for pt in points ]
+            objFunc = []
+            cons = []
+            for x,point in enumerate(points):
+                objFunc.append( cvx.norm(epsilons[x], self.p) )
+                cons.append( self.A * (points[x] - epsilons[x]) >= self.b )
+                cons.append( ai * (points[x] - epsilons[x]) == bi )
+            obj = cvx.Minimize(sum(objFunc))
+            prob = cvx.Problem(obj, cons)
+            result = prob.solve()
+            xStars = [ (np.mat(point).T - epsilon.value) for point, epsilon in zip(points, epsilons) ]
+        else:
+            self.solve(points)
+            xStars = self.optimal_points(points)
+        return xStars
+
     def _initialize_kwargs(self, kwargs):
         # common kwargs
         if 'verbose' in kwargs:

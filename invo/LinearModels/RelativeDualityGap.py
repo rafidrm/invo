@@ -1,6 +1,6 @@
 import cvxpy as cvx
 import numpy as np
-#import pudb
+import pudb
 
 from ..utils.invoutils import checkFeasibility
 
@@ -101,17 +101,38 @@ class RelativeDualityGap():
         prob2 = cvx.Problem(obj2, cons2)
         result2 = prob2.solve()
 
-        if result1 < result2:
+        # then solve the zero variant
+        y3 = cvx.Variable(m)
+        c3 = cvx.Variable(n)
+        obj3 = cvx.Minimize(0)
+
+        cons3 = []
+        cons3.append( y3 >= 0 )
+        cons3.append( self.A.T * y3 == c3 )
+        cons3.append( y3.T * self.b == 0 )
+        allOnes = np.mat(np.ones(15)).T
+        cons3.append( y3.T * allOnes == 1 )
+        for point in points:
+            cons3.append( c3.T * point == 0 )
+        
+        prob3 = cvx.Problem(obj3, cons3)
+        result3 = prob3.solve()
+
+        optimalReform = np.argmin([ result1, result2, result3 ])
+        if optimalReform == 0:
             self.c = c1.value / np.linalg.norm(c1.value, 1)
-            self.dual = y1.value / np.linalg.norm(c1.value, 1)
-        else:
+            self.dual = y1.value / np.linalg.norm(y1.value, 1)
+        elif optimalReform == 1:
             self.c = c2.value / np.linalg.norm(c2.value, 1)
-            self.dual = y2.value / np.linalg.norm(c2.value, 1)
+            self.dual = y2.value / np.linalg.norm(y2.value, 1)
+        elif optimalReform == 2:
+            self.c = c3.value / np.linalg.norm(c3.value, 1)
+            self.dual = y3.value / np.linalg.norm(y3.value, 1)
 
         self.c = self.c.T.tolist()[0]
         self.dual = self.dual.T.tolist()[0]
         self._solved = True
-        return min(result1, result2)
+        return np.min([result1, result2, result3])
 
     def _initialize_kwargs(self, kwargs):
         if 'verbose' in kwargs:

@@ -1,5 +1,5 @@
 import numpy as np
-#import pudb
+import pudb
 
 from ..LinearModels import AbsoluteDualityGap
 from ..LinearModels import RelativeDualityGap
@@ -96,7 +96,10 @@ if __name__ == "__main__":
     result = simpleLp(vertices, interiorPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
-    
+    projections = model.optimal_points(interiorPoints)
+    print(projections)
+    pu.db
+
     print('\n *** Testing pNorm with feasible and infeasible points, hull method *** \n')
     mixedPoints = [
             np.array([1.1, 0.1, 0.1, 0.1]),
@@ -108,4 +111,6 @@ if __name__ == "__main__":
     result = simpleLp(vertices, mixedPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
+    projections = model.optimal_points(interiorPoints)
+    print(projections)
 
