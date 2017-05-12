@@ -1,3 +1,21 @@
+""" Absolute Duality Gap Inverse Optimization
+
+The absolute duality gap method for inverse optimization minimizes the aggregate
+duality gap between the primal and dual objective values for each observed
+decision. The problem is formulated as follows
+
+.. math::
+    
+    \min_{\mathbf{c, y},\epsilon_1, \dots, \epsilon_Q} \quad  & \sum_{q=1}^Q | \epsilon_q |
+
+         \\text{s.t.}\quad\quad  & \mathbf{A'y = c} 
+         
+         & \mathbf{c'\hat{x}_q = b'y} + \epsilon_q, \quad \\forall q
+         
+         & \| \mathbf{c} \|_1 = 1
+         
+         & \mathbf{y \geq 0}
+"""
 import cvxpy as cvx
 import numpy as np
 #import pudb
@@ -12,6 +30,15 @@ class AbsoluteDualityGap():
     Args:
         tol (int): Sets number of significant digits. Default is 8.
         verbose (bool): Sets displays.  Default False. 
+    
+    Example:
+        Suppose that the variables ``A`` and ``b`` are numpy matrices and ``points`` is
+        a list of numpy arrays::
+
+           model = AbsoluteDualityGap()
+           model.FOP(A, b)
+           model.solve(points)
+           print (model.c)
     """
 
     def __init__(self, **kwargs):
@@ -19,24 +46,75 @@ class AbsoluteDualityGap():
         self._verbose = False
         self._solved = False
         self.tol = 8
+        self.solver = cvx.ECOS_BB
         self._kwargs = self._initialize_kwargs(kwargs)
         
     def FOP(self, A, b):
-        """ Creates a forward optimization probelm, by defining the feasible 
-        set P = { x : Ax >= b }.
-
+        """ Create a forward optimization problem.
+        
         Args:
-            A (matrix): numpy array.
-            b (matrix): numpy array.
+            A (matrix): numpy matrix of shape :math:`m \\times n`.
+            b (matrix): numpy matrix of shape :math:`m \\times 1`.
+
+        Currently, the forward problem is constructed by the user supplying a
+        constraint matrix ``A`` and vector ``b``. The forward problem is
+
+        .. math::
+
+            \min_{\mathbf{x}} \quad&\mathbf{c'x}
+
+            \\text{s.t} \quad&\mathbf{A x \geq b}
         """
         self.A = np.mat(A)
         self.b = np.mat(b)
         self._fop = True
 
     def solve(self, points):
-        """ Solves the inverse optimization problem. First check if all of the 
-        points are feasible, in which case, can solve m linear programs. 
-        Otherwise, solve 2^n linear programs with the enumeration method.
+        """ Solves the inverse optimization problem. 
+        
+        Args:
+            points (list): list of numpy arrays, denoting the (optimal) observed points.
+
+        Returns:
+            error (float): the optimal value of the inverse optimization problem.
+        
+        First check if all of the points are feasible, in which case we can
+        just project the points to each of the hyperplanes. Let :math:`\\bar{x}`
+        denote the centroid of the points. Then, we just solve
+
+        .. math::
+
+            \min_{i \in \mathcal{M}} \left\{ \\frac{\mathbf{a_i'\\bar{x} - }b_i }{\| \mathbf{a_i} \|_1} \\right\}
+
+        Let :math:`i^*` denote the optimal index. The optimal cost and dual 
+        variables are
+
+        .. math::
+
+            \mathbf{c^*} &= \mathbf{\\frac{a_{i^*}}{\|a_{i^*}\|}}
+
+            \mathbf{y^*} &= \mathbf{\\frac{e_{i^*}}{\|a_{i^*}\|}}
+        
+        If not all of the points are feasible, then we need to solve an
+        exponential number of optimization problems. Let :math:`\mathcal{C}^+, \mathcal{C}^- \subseteq \{ 1, \dots, n \}`
+        be a partition of the index set of length ``n``. For each possible
+        partition, we solve the following problem
+
+        .. math::
+
+            \min_{\mathbf{c, y}, \epsilon_1,\dots,\epsilon_Q} \quad  & \sum_{q=1}^Q | \epsilon_q |
+
+            \\text{s.t.} \quad  & \mathbf{A'y = c}
+            
+            & \mathbf{c'\hat{x}_q = b'y} + \epsilon_q, \quad \\forall q 
+            
+            & \sum_{i \in \mathcal{C}^+} c_i + \sum_{i \in \mathcal{C}^-} c_i = 1 
+            
+            & c_i \geq 0, \quad i \in \mathcal{C}^+
+            
+            & c_i \leq 0, \quad i \in \mathcal{C}^-
+            
+            & \mathbf{y \geq 0}
         """
         points = [ np.mat(point).T for point in points ]
         assert self._fop, 'No forward model given.'
@@ -94,7 +172,7 @@ class AbsoluteDualityGap():
                 cons.append( z[i] >= y.T * chi )
                 cons.append( z[i] >= -1 * y.T * chi )
             prob = cvx.Problem(obj, cons)
-            result = prob.solve()
+            result = prob.solve(solver=self.solver)
 
             if result < bestResult:
                 bestResult = result
@@ -113,6 +191,11 @@ class AbsoluteDualityGap():
         if 'tol' in kwargs:
             assert isinstance(kwargs['tol'], int), 'tolerance needs to be an integer.'
             self.tol = kwargs['tol']
+        if 'solver' in kwargs:
+            if kwargs['solver'] in cvx.installed_solvers():
+                self.solver = getattr(cvx, kwargs['solver'])                
+            else:
+                print ('you do not have this solver.')
         
         return kwargs
 

@@ -1,3 +1,9 @@
+#! usr/bin/env/python
+#
+# By Rafid Mahmood <rafid.mahmood@mail.utoronto.ca>
+# License: MIT
+
+
 from setuptools import setup
 
 

@@ -1,3 +1,21 @@
+""" Relative Duality Gap Inverse Optimization
+
+The relative duality gap uses the ratio of the primal objective value over the 
+dual objective value of the forward problem  as the measure of sub-optimality.
+This inverse optimization problem is formulated as 
+
+.. math::
+    
+    \min_{\mathbf{c, y},\epsilon_1, \dots, \epsilon_Q} \quad  & \sum_{q=1}^Q | \epsilon_q - 1 |
+
+    \\text{s.t.}\quad\quad  & \mathbf{A'y = c} 
+         
+    & \mathbf{c'\hat{x}_q = b'y} \epsilon_q
+         
+    & \| \mathbf{c} \|_1 = 1
+         
+    & \mathbf{y \geq 0}
+"""
 import cvxpy as cvx
 import numpy as np
 import pudb
@@ -13,6 +31,15 @@ class RelativeDualityGap():
     Args:
         tol (int): Sets number of significant digits. Default is 8. 
         verbose (bool): Sets displays.  Default False. 
+    
+    Example:
+        Suppose that the variables ``A`` and ``b`` are numpy matrices and ``points`` is
+        a list of numpy arrays::
+
+           model = RelativeDualityGap()
+           model.FOP(A, b)
+           model.solve(points)
+           print (model.c)
     """
 
     def __init__(self, **kwargs):
@@ -23,31 +50,89 @@ class RelativeDualityGap():
         self._solved = False
         self._verbose = False
         self.tol = 8
+        self.solver = cvx.ECOS_BB
         self._kwargs = self._initialize_kwargs(kwargs)
 
     def FOP(self, A, b):
-        """ Creates a forward optimization problem, by defining the feasible 
-        set P = { x : Ax >= b }.
-
+        """ Create a forward optimization problem.
+        
         Args:
-            A (matrix): numpy array.
-            b (matrix): numpy array.
+            A (matrix): numpy matrix of shape :math:`m \\times n`.
+            b (matrix): numpy matrix of shape :math:`m \\times 1`.
+
+        Currently, the forward problem is constructed by the user supplying a
+        constraint matrix ``A`` and vector ``b``. The forward problem is
+
+        .. math::
+
+            \min_{\mathbf{x}} \quad&\mathbf{c'x}
+
+            \\text{s.t} \quad&\mathbf{A x \geq b}
         """
         self.A = np.mat(A)
         self.b = np.mat(b)
         self._fop = True
 
     def solve(self, points):
-        """ Solves the inverse optimization problem, by reformulating it to the
-        following LP.
+        """ Solves the inverse optimization problem. 
+        
+        Args:
+            points (list): list of numpy arrays, denoting the (optimal) observed points.
 
-        min     sum z_q
-        st      z_q >= e_q - 1
-        z_q >= 1 - e_q
-        A'y = c
-        c'x_q = e_q
-        b'y = 1
-        y >= 0
+        Returns:
+            error (float): the optimal value of the inverse optimization problem.
+        
+        To solve a relative duality gap problem, we solve the three following
+        optimization problems.
+
+        .. math::
+
+            \min_{\mathbf{c, y},\epsilon_1, \dots, \epsilon_Q} \quad  & \sum_{q=1}^Q | \epsilon_q - 1 |
+
+            \\text{s.t.}\quad\quad  & \mathbf{A'y = c} 
+                 
+            & \mathbf{c'\hat{x}_q = } \epsilon_q
+                 
+            & \mathbf{b'y} = 1
+                 
+            & \mathbf{y \geq 0}
+
+        .. math::
+
+            \min_{\mathbf{c, y},\epsilon_1, \dots, \epsilon_Q} \quad  & \sum_{q=1}^Q | \epsilon_q - 1 |
+
+            \\text{s.t.}\quad\quad  & \mathbf{A'y = c} 
+                 
+            & \mathbf{c'\hat{x}_q = } -\epsilon_q
+                 
+            & \mathbf{b'y} = -1
+                 
+            & \mathbf{y \geq 0}
+
+        .. math::
+
+            \min_{\mathbf{c, y},\epsilon_1, \dots, \epsilon_Q} \quad  & 0 
+
+            \\text{s.t.}\quad\quad  & \mathbf{A'y = c} 
+                 
+            & \mathbf{c'\hat{x}_q =} 0 
+                 
+            & \mathbf{b'y} = 0
+
+            & \mathbf{y'1} = 0
+                 
+            & \mathbf{y \geq 0}
+        
+        The optimal value of the relative duality gap problem is equal to the 
+        optimal value of the minimum of these problems. Let :math:`\mathbf{\hat{c}, \hat{y}}`
+        denote the optimal solution of that corresponding problem. Then, the 
+        optimal solution of the relative duality gap problem is
+
+        .. math::
+
+            \mathbf{c^*} &= \mathbf{\\frac{\hat{c}}{\|\hat{c}\|_1}}
+
+            \mathbf{y^*} &= \mathbf{\\frac{\hat{y}}{\|\hat{c}\|_1}}
         """
         points = [ np.mat(point).T for point in points ]
         assert self._fop, 'No forward model given.'
@@ -82,7 +167,7 @@ class RelativeDualityGap():
             cons1.append( z1[i] >= 1 - c1.T * point )
         
         prob1 = cvx.Problem(obj1, cons1)
-        result1 = prob1.solve()
+        result1 = prob1.solve(solver=self.solver)
 
         # then solve the negative variant
         y2 = cvx.Variable(m)
@@ -99,7 +184,7 @@ class RelativeDualityGap():
             cons2.append( z2[i] >= -1 - c2.T * point )
         
         prob2 = cvx.Problem(obj2, cons2)
-        result2 = prob2.solve()
+        result2 = prob2.solve(solver=self.solver)
 
         # then solve the zero variant
         y3 = cvx.Variable(m)
@@ -116,7 +201,7 @@ class RelativeDualityGap():
             cons3.append( c3.T * point == 0 )
         
         prob3 = cvx.Problem(obj3, cons3)
-        result3 = prob3.solve()
+        result3 = prob3.solve(solver=self.solver)
 
         optimalReform = np.argmin([ result1, result2, result3 ])
         if optimalReform == 0:
@@ -141,6 +226,11 @@ class RelativeDualityGap():
         if 'tol' in kwargs:
             assert isinstance(kwargs['tol'], int), 'tolernace needs to be an integer.'
             self.tol = kwargs['tol']
+        if 'solver' in kwargs:
+            if kwargs['solver'] in cvx.installed_solvers():
+                self.solver = getattr(cvx, kwargs['solver'])                
+            else:
+                print ('you do not have this solver.')
 
         return kwargs
 

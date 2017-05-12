@@ -1,3 +1,27 @@
+""" Decision Space Inverse Optimization with a p-norm.
+
+These models measure error in the space of decision variables, rather than 
+objective values. In particular, these models aim to identify a cost vector that
+induces optimal decisions for the forward problem that are of minimum aggregate 
+distance to the corresponding observed decisions. Any norm can be used in the 
+decision space, but the key distinction is that the imputed optimal decisions 
+must be feasible for the forward problem. A decision space inverse optimization
+problem is formulated as
+
+.. math::
+
+    \min_{\mathbf{c, y}, \\boldsymbol{ \epsilon_1,} \dots, \\boldsymbol{ \epsilon_Q }} \quad  & \sum_{q=1}^Q \| \\boldsymbol{\epsilon_q} \|
+    
+    \\text{s.t.}\quad\quad  & \mathbf{A'y = c}
+    
+    & \mathbf{c'\hat{x}_q = b'y} + \\boldsymbol{\epsilon_q}, \quad \\forall q 
+    
+    & \mathbf{A ( \hat{x}_q -} \\boldsymbol{ \epsilon_q } \mathbf{ ) \geq b}
+    
+    & \| \mathbf{c} \|_1 = 1 
+    
+    & \mathbf{y \geq 0}
+"""
 import cvxpy as cvx
 import numpy as np
 #import pudb
@@ -23,20 +47,44 @@ class pNorm():
         self._kwargs = self._initialize_kwargs(kwargs)
 
     def FOP(self, A, b):
-        """ Creates a forward optimization problem, by defining the feasible 
-        set P = { x | Ax >= b }.
-
+        """ Create a forward optimization problem.
+        
         Args:
-            A (matrix): numpy array.
-            b (matrix): numpy array.
+            A (matrix): numpy matrix of shape :math:`m \\times n`.
+            b (matrix): numpy matrix of shape :math:`m \\times 1`.
+
+        Currently, the forward problem is constructed by the user supplying a
+        constraint matrix `A` and vector `b`. The forward problem is
+
+        .. math::
+
+            \min_{\mathbf{x}} \quad&\mathbf{c'x}
+
+            \\text{s.t} \quad&\mathbf{A x \geq b}
         """
         self.A = np.mat(A)
         self.b = np.mat(b)
         self._fop = True
 
     def solve(self, points):
-        """ Solves the inverse optimization problem, by calculating the 
-        feasible projection.
+        """ Solves the inverse optimization problem. 
+        
+        Args:
+            points (list): list of numpy arrays, denoting the (optimal) observed points.
+
+        Returns:
+            error (float): the optimal value of the inverse optimization problem.
+        
+        To solve a decision space inverse optimization problem, we solve the 
+        following convex problem for every constraint
+
+        .. math::
+
+            \min_{\\boldsymbol{ \epsilon_1,} \dots, \\boldsymbol{ \epsilon_Q }} \quad  & \sum_{q=1}^Q \| \\boldsymbol{\epsilon_q} \|_p
+            
+            \\text{s.t.} \quad\quad  & \mathbf{ a_i'(x_q - }\\boldsymbol{\epsilon_q}\mathbf{)} = b_i
+            
+            & \mathbf{ A ( x_q - }\\boldsymbol{\epsilon_q}\mathbf{) \geq b}
         """
         points = [ np.mat(point).T for point in points ]
         assert self._fop, 'No forward model given.'
@@ -75,6 +123,18 @@ class pNorm():
         return result 
        
     def optimal_points(self, points):
+        """ Get the projected optimal points.
+
+        Args:
+            points (list): list of numpy arrays, denoting the observed points.
+
+        Returns:
+            truePoints (list): list of numpy arrays denoting the imputed optimal points.
+        
+        Once an inverse optimization problem is solved and the forward model is
+        completed, you can take a collection of observed data points and get
+        the 'imputed' optimal points.
+        """
         if self._solved:
             m,n = self.A.shape
             ind = np.argmax(self.dual)
