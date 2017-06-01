@@ -219,6 +219,23 @@ class RelativeDualityGap():
         self._solved = True
         return np.min([result1, result2, result3])
 
+    def rho(self, points):
+        """ Solves the goodness of fit.
+        """
+        assert self._solved, 'you need to solve first.'
+
+        m,n = self.A.shape
+        #numer = [ np.abs(np.dot(self.c, point) - np.dot(self.dual, self.b)) / np.abs(np.dot(self.dual, self.b)) for point in points ]
+        numer = [ np.abs(np.dot(self.c, point) - 1) for point in points ]
+        numer = sum(numer)
+        denom = 0
+        for i in range(m):
+            #denomTerm = [ np.abs(np.dot(self.A[i], point) - self.b[i]) / np.abs(self.b[i]) for point in points ]
+            denomTerm = [ np.abs(np.dot(self.A[i], point) - 1) for point in points ]
+            denom += sum(denomTerm)
+        rho = 1 - numer/denom
+        return rho[0,0]
+
     def _initialize_kwargs(self, kwargs):
         if 'verbose' in kwargs:
             assert isinstance(kwargs['verbose'], bool), 'verbose needs to be True or False.'

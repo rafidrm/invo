@@ -48,6 +48,8 @@ if __name__ == "__main__":
     result = simpleLp(vertices, interiorPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
+    rho = model.rho(interiorPoints)
+    print('rho = {}'.format(rho))
     
     print('\n *** Testing ADG with feasible and infeasible points, hull method *** \n')
     mixedPoints = [
@@ -60,6 +62,8 @@ if __name__ == "__main__":
     result = simpleLp(vertices, mixedPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
+    rho = model.rho(mixedPoints)
+    print('rho = {}'.format(rho))
     
     print('\n *** Testing RDG with feasible points, hull method *** \n')
     interiorPoints = [
@@ -72,6 +76,8 @@ if __name__ == "__main__":
     result = simpleLp(vertices, interiorPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
+    rho = model.rho(interiorPoints)
+    print('rho = {}'.format(rho))
     
     print('\n *** Testing RDG with feasible and infeasible points, hull method *** \n')
     mixedPoints = [
@@ -84,6 +90,8 @@ if __name__ == "__main__":
     result = simpleLp(vertices, mixedPoints, model)
     for key, value in result.items():
         print ('{} = {}'.format(key, value))
+    rho = model.rho(mixedPoints)
+    print('rho = {}'.format(rho))
 
     print('\n *** Testing pNorm with feasible points, hull method *** \n')
     interiorPoints = [
@@ -98,7 +106,8 @@ if __name__ == "__main__":
         print ('{} = {}'.format(key, value))
     projections = model.optimal_points(interiorPoints)
     print(projections)
-    pu.db
+    rho = model.rho(interiorPoints)
+    print('rho = {}'.format(rho))
 
     print('\n *** Testing pNorm with feasible and infeasible points, hull method *** \n')
     mixedPoints = [
@@ -113,4 +122,6 @@ if __name__ == "__main__":
         print ('{} = {}'.format(key, value))
     projections = model.optimal_points(interiorPoints)
     print(projections)
+    rho = model.rho(mixedPoints)
+    print('rho = {}'.format(rho))
 

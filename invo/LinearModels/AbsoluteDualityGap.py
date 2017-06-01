@@ -182,7 +182,22 @@ class AbsoluteDualityGap():
         self.error = bestResult
         self.dual = self.dual.T.tolist()[0] # reconvert to just a list
         self.c = self.c.T.tolist()[0]
-        return result 
+        return self.error 
+
+    def rho(self, points):
+        """ Solves the goodness of fit.
+        """
+        assert self._solved, 'you need to solve first.'
+
+        m,n = self.A.shape
+        numer = [ np.abs(np.dot(self.c, point) - np.dot(self.dual, self.b)) for point in points ]
+        numer = sum(numer)
+        denom = 0 
+        for i in range(m):
+            denomTerm = [ np.abs(np.dot(self.A[i], point) - self.b[i]) for point in points ]
+            denom += sum(denomTerm)
+        rho = 1 - numer/denom
+        return rho[0,0]
         
     def _initialize_kwargs(self, kwargs):
         if 'verbose' in kwargs:

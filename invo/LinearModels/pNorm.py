@@ -93,23 +93,12 @@ class pNorm():
 
     def _solveFeasibleProjection(self, points):
         m,n = self.A.shape
-        nPoints = len(points)
         bestResult = np.inf
 
         for i in range(m):
             ai = self.A[i]
             bi = self.b[i]
-            
-            epsilons = [ cvx.Variable(n) for pt in points ]
-            objFunc = []
-            cons = []
-            for x in range(nPoints):
-                objFunc.append( cvx.norm(epsilons[x], self.p) )
-                cons.append( self.A * (points[x] - epsilons[x]) >= self.b )
-                cons.append( ai * (points[x] - epsilons[x]) == bi )
-            obj = cvx.Minimize(sum(objFunc))
-            prob = cvx.Problem(obj, cons)
-            result = prob.solve()
+            result = self._project_to_hyperplane(points, ai, bi)
 
             if result < bestResult:
                 bestResult = result
@@ -121,7 +110,25 @@ class pNorm():
         self.c = self.c.tolist()[0]
         self.error = bestResult
         return result 
-       
+    
+    def _project_to_hyperplane(self, points, ai, bi):
+        """ Helper function that solves feasible projection to a hyperplane
+        """
+        m,n = self.A.shape
+        nPoints = len(points)
+        epsilons = [ cvx.Variable(n) for pt in points ]
+        objFunc = []
+        cons = []
+        for x in range(nPoints):
+            objFunc.append( cvx.norm(epsilons[x], self.p) )
+            cons.append( self.A * (points[x] - epsilons[x]) >= self.b )
+            cons.append( ai * (points[x] - epsilons[x]) == bi )
+        obj = cvx.Minimize(sum(objFunc))
+        prob = cvx.Problem(obj, cons)
+        result = prob.solve()
+        return result
+
+
     def optimal_points(self, points):
         """ Get the projected optimal points.
 
@@ -156,6 +163,25 @@ class pNorm():
             xStars = self.optimal_points(points)
         return xStars
 
+    def rho(self, points):
+        """ Solves the goodness of fit.
+        """
+        assert self._solved, 'you need to solve first.'
+        
+        m,n = self.A.shape
+        projections = self.optimal_points(points)
+        _pts = [ np.mat(pt).T for pt in points ]
+        numer = [ np.linalg.norm(pj - pt, self.p) for pj, pt in zip(projections, _pts) ]
+        numer = sum(numer)
+        denom = 0
+        for i in range(m):
+            ai = self.A[i]
+            bi = self.b[i]
+            result = self._project_to_hyperplane(points, ai, bi)
+            denom += result
+        rho = 1 - numer/denom
+        return rho
+    
     def _initialize_kwargs(self, kwargs):
         # common kwargs
         if 'verbose' in kwargs:
