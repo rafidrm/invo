@@ -144,7 +144,7 @@ class AbsoluteDualityGap():
     def _solveBruteForce(self, points):
         m,n = self.A.shape
         nPoints = len(points)
-        nFormulations = 2 ** n - 1
+        nFormulations = 2 ** n 
         bestResult = np.inf
 
         for formulation in range(nFormulations):
