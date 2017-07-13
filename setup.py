@@ -9,12 +9,12 @@ from setuptools import setup
 
 setup(
         name='invo',
-        version='0.4',
+        version='0.4.1',
         description='A Generalized Inverse Optimization package.',
         author='Rafid Mahmood',
         author_email='rafid.mahmood@mail.utoronto.ca',
         url='https://github.com/rafidrm/invo',
-        download_url='https://github.com/rafidrm/invo/archive/0.4.tar.gz',
+        download_url='https://github.com/rafidrm/invo/archive/0.4.1.tar.gz',
         license='MIT',
         packages=['invo', 
             'invo.LinearModels',
