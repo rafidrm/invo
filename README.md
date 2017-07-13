@@ -13,6 +13,9 @@ Invo uses numpy, scipy, and cvxpy as dependencies, so you may need to install th
 
 ## Usage
 
+For more detailed documentation, refer to our [ReadTheDocs](http://pyinvo.readthedocs.io/en/latest/)
+
+
 An invo problem has two stages. You first define a forward model, and then you solve the corresponding inverse optimization problem. Currently, we assume forward problems are given in inequality form as follows:
 <p align="center"><img src="https://rawgit.com/rafidrm/invo/master/svgs/98a1e418f729823bb9c36e247ad53bcc.svg?invert_in_darkmode" align=middle width=96.70749pt height=16.376943pt/></p> 
 
