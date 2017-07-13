@@ -195,7 +195,7 @@ class RelativeDualityGap():
         cons3.append( y3 >= 0 )
         cons3.append( self.A.T * y3 == c3 )
         cons3.append( y3.T * self.b == 0 )
-        allOnes = np.mat(np.ones(15)).T
+        allOnes = np.mat(np.ones(m)).T
         cons3.append( y3.T * allOnes == 1 )
         for point in points:
             cons3.append( c3.T * point == 0 )
