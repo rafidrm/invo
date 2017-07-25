@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
         name='invo',
-        version='0.4.1',
+        version='0.4.2',
         description='A Generalized Inverse Optimization package.',
         author='Rafid Mahmood',
         author_email='rafid.mahmood@mail.utoronto.ca',
