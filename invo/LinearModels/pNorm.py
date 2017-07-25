@@ -26,24 +26,37 @@ import cvxpy as cvx
 import numpy as np
 #import pudb
 
-
+from ..utils.invoutils import validateFOP
 
 
 class pNorm():
-    """ Formulate an Absolute Duality Gap method of GMIO.
+    """ Formulate a Decision Space (p-norm) method of GMIO.
 
     Args:
         tol (int): Sets number of significant digits. Default is 8.
         p (int): Sets p for lp norm. Can be integer or 'inf'. Default is 2.
         verbose (bool): Sets displays.  Default is False. 
+        ban_constraints (list): A list of constraint indices to force to zero when solving. Default is none.
+    
+    Example:
+        Suppose that the variables ``A`` and ``b`` are numpy matrices and ``points`` is
+        a list of numpy arrays::
+
+           model = pNorm(p=2)
+           model.FOP(A, b)
+           model.solve(points)
+           print (model.c)
     """
 
     def __init__(self, **kwargs):
+        """
+        """
         self._fop = False
         self._verbose = False
         self._solved = False
         self.p = 2
         self.tol = 8
+        self.ban_constraints = []
         self._kwargs = self._initialize_kwargs(kwargs)
 
     def FOP(self, A, b):
@@ -62,11 +75,12 @@ class pNorm():
 
             \\text{s.t} \quad&\mathbf{A x \geq b}
         """
-        self.A = np.mat(A)
-        self.b = np.mat(b)
+        #self.A = np.mat(A)
+        #self.b = np.mat(b)
+        self.A, self.b = validateFOP(A, b)
         self._fop = True
 
-    def solve(self, points):
+    def solve(self, points, **kwargs):
         """ Solves the inverse optimization problem. 
         
         Args:
@@ -86,6 +100,8 @@ class pNorm():
             
             & \mathbf{ A ( x_q - }\\boldsymbol{\epsilon_q}\mathbf{) \geq b}
         """
+        self._kwargs = self._initialize_kwargs(kwargs)
+        
         points = [ np.mat(point).T for point in points ]
         assert self._fop, 'No forward model given.'
         self.error = self._solveFeasibleProjection(points)
@@ -96,9 +112,12 @@ class pNorm():
         bestResult = np.inf
 
         for i in range(m):
-            ai = self.A[i]
-            bi = self.b[i]
-            result = self._project_to_hyperplane(points, ai, bi)
+            if i in self.ban_constraints:
+                result = np.inf
+            else:
+                ai = self.A[i]
+                bi = self.b[i]
+                result = self._project_to_hyperplane(points, ai, bi)
 
             if result < bestResult:
                 bestResult = result

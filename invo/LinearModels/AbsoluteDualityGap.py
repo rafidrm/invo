@@ -20,7 +20,7 @@ import cvxpy as cvx
 import numpy as np
 #import pudb
 
-from ..utils.invoutils import checkFeasibility
+from ..utils.invoutils import checkFeasibility, validateFOP
 
 
 
@@ -29,8 +29,10 @@ class AbsoluteDualityGap():
         
     Args:
         tol (int): Sets number of significant digits. Default is 8.
-        verbose (bool): Sets displays.  Default False. 
-    
+        verbose (bool): Sets displays.  Default is False.
+        force_feasible_method (bool): If set to True, then will enforce the hyperplane projection method regardless of feasible points. Default is False.
+        ban_constraints (list): A list of constraint indices to force to zero when solving. Default is none.
+ 
     Example:
         Suppose that the variables ``A`` and ``b`` are numpy matrices and ``points`` is
         a list of numpy arrays::
@@ -47,6 +49,8 @@ class AbsoluteDualityGap():
         self._solved = False
         self.tol = 8
         self.solver = cvx.ECOS_BB
+        self.force_feasible_method = False
+        self.ban_constraints = []
         self._kwargs = self._initialize_kwargs(kwargs)
         
     def FOP(self, A, b):
@@ -65,11 +69,12 @@ class AbsoluteDualityGap():
 
             \\text{s.t} \quad&\mathbf{A x \geq b}
         """
-        self.A = np.mat(A)
-        self.b = np.mat(b)
+        #self.A = np.mat(A)
+        #self.b = np.mat(b)
+        self.A, self.b = validateFOP(A, b)
         self._fop = True
 
-    def solve(self, points):
+    def solve(self, points, **kwargs):
         """ Solves the inverse optimization problem. 
         
         Args:
@@ -116,10 +121,12 @@ class AbsoluteDualityGap():
             
             & \mathbf{y \geq 0}
         """
+        self._kwargs = self._initialize_kwargs(kwargs)
+        
         points = [ np.mat(point).T for point in points ]
         assert self._fop, 'No forward model given.'
         feasible = checkFeasibility(points, self.A, self.b, self.tol)
-        if feasible:
+        if feasible or self.force_feasible_method:
             self.error = self._solveHyperplaneProjection(points)
         else:
             self.error = self._solveBruteForce(points)
@@ -129,9 +136,12 @@ class AbsoluteDualityGap():
         m,n = self.A.shape
         errors = np.zeros(m)
         for i in range(m):
-            ai = self.A[i] / np.linalg.norm(self.A[i], np.inf)
-            bi = self.b[i] / np.linalg.norm(self.A[i], np.inf)
-            errors[i] = np.sum([ ai * pt - bi for pt in points ])
+            if i in self.ban_constraints:
+                errors[i] = 9999999
+            else:
+                ai = self.A[i] / np.linalg.norm(self.A[i], np.inf)
+                bi = self.b[i] / np.linalg.norm(self.A[i], np.inf)
+                errors[i] = np.sum([ ai * pt - bi for pt in points ])
         minInd = np.argmin(errors)
         self.c = self.A[minInd] / np.linalg.norm(self.A[minInd], np.inf)
         self.c = self.c.tolist()[0]
@@ -162,15 +172,21 @@ class AbsoluteDualityGap():
             cons.append( y >= 0 )
             cons.append( self.A.T * y == c )
             cons.append( cSign * c == 1 )
+            
             for i in range(n):
                 if cSign[0,i] == 1:
                     cons.append( c[i] >= 0 )
                 else:
                     cons.append( c[i] <= 0 )
+            
             for i in range(nPoints):
                 chi = self.A * points[i] - self.b
                 cons.append( z[i] >= y.T * chi )
                 cons.append( z[i] >= -1 * y.T * chi )
+            
+            for i in self.ban_constraints:
+                cons.append( y[i] == 0 )
+            
             prob = cvx.Problem(obj, cons)
             result = prob.solve(solver=self.solver)
 
@@ -203,9 +219,19 @@ class AbsoluteDualityGap():
         if 'verbose' in kwargs:
             assert isinstance(kwargs['verbose'], bool), 'verbose needs to be True or False.'
             self._verbose = kwargs['verbose']
+        
         if 'tol' in kwargs:
             assert isinstance(kwargs['tol'], int), 'tolerance needs to be an integer.'
             self.tol = kwargs['tol']
+        
+        if 'force_feasible_method' in kwargs:
+            assert isinstance(kwargs['force_feasible_method'], bool), 'force feasible method needs to be True or False.'
+            self.force_feasible_method = kwargs['force_feasible_method']
+        
+        if 'ban_constraints' in kwargs:
+            assert isinstance(kwargs['ban_constraints'], list), 'ban constraints needs to be a list.'
+            self.ban_constraints = kwargs['ban_constraints']
+        
         if 'solver' in kwargs:
             if kwargs['solver'] in cvx.installed_solvers():
                 self.solver = getattr(cvx, kwargs['solver'])                

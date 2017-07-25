@@ -20,7 +20,7 @@ import cvxpy as cvx
 import numpy as np
 import pudb
 
-from ..utils.invoutils import checkFeasibility
+from ..utils.invoutils import checkFeasibility, validateFOP
 
 
 
@@ -31,6 +31,7 @@ class RelativeDualityGap():
     Args:
         tol (int): Sets number of significant digits. Default is 8. 
         verbose (bool): Sets displays.  Default False. 
+        ban_constraints (list): A list of constraint indices to force to zero when solving. Default is none.
     
     Example:
         Suppose that the variables ``A`` and ``b`` are numpy matrices and ``points`` is
@@ -51,6 +52,7 @@ class RelativeDualityGap():
         self._verbose = False
         self.tol = 8
         self.solver = cvx.ECOS_BB
+        self.ban_constraints = []
         self._kwargs = self._initialize_kwargs(kwargs)
 
     def FOP(self, A, b):
@@ -69,11 +71,12 @@ class RelativeDualityGap():
 
             \\text{s.t} \quad&\mathbf{A x \geq b}
         """
-        self.A = np.mat(A)
-        self.b = np.mat(b)
+        #self.A = np.mat(A)
+        #self.b = np.mat(b)
+        self.A, self.b = validateFOP(A, b)
         self._fop = True
 
-    def solve(self, points):
+    def solve(self, points, **kwargs):
         """ Solves the inverse optimization problem. 
         
         Args:
@@ -134,6 +137,8 @@ class RelativeDualityGap():
 
             \mathbf{y^*} &= \mathbf{\\frac{\hat{y}}{\|\hat{c}\|_1}}
         """
+        self._kwargs = self._initialize_kwargs(kwargs)
+        
         points = [ np.mat(point).T for point in points ]
         assert self._fop, 'No forward model given.'
         self.error = self._solveRelativeDGLP(points)
@@ -166,6 +171,9 @@ class RelativeDualityGap():
             cons1.append( z1[i] >= c1.T * point - 1 )
             cons1.append( z1[i] >= 1 - c1.T * point )
         
+        for i in self.ban_constraints:
+            cons1.append( y1[i] == 0 )
+        
         prob1 = cvx.Problem(obj1, cons1)
         result1 = prob1.solve(solver=self.solver)
 
@@ -183,6 +191,9 @@ class RelativeDualityGap():
             cons2.append( z2[i] >= c2.T * point + 1 )
             cons2.append( z2[i] >= -1 - c2.T * point )
         
+        for i in self.ban_constraints:
+            cons2.append( y2[i] == 0 )
+        
         prob2 = cvx.Problem(obj2, cons2)
         result2 = prob2.solve(solver=self.solver)
 
@@ -199,6 +210,9 @@ class RelativeDualityGap():
         cons3.append( y3.T * allOnes == 1 )
         for point in points:
             cons3.append( c3.T * point == 0 )
+        
+        for i in self.ban_constraints:
+            cons3.append( y3[i] == 0 )
         
         prob3 = cvx.Problem(obj3, cons3)
         result3 = prob3.solve(solver=self.solver)
@@ -240,9 +254,15 @@ class RelativeDualityGap():
         if 'verbose' in kwargs:
             assert isinstance(kwargs['verbose'], bool), 'verbose needs to be True or False.'
             self._verbose = kwargs['verbose']
+        
         if 'tol' in kwargs:
             assert isinstance(kwargs['tol'], int), 'tolernace needs to be an integer.'
             self.tol = kwargs['tol']
+        
+        if 'ban_constraints' in kwargs:
+            assert isinstance(kwargs['ban_constraints'], list), 'ban constraints needs to be a list.'
+            self.ban_constraints = kwargs['ban_constraints']
+        
         if 'solver' in kwargs:
             if kwargs['solver'] in cvx.installed_solvers():
                 self.solver = getattr(cvx, kwargs['solver'])                
