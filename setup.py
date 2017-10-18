@@ -12,7 +12,7 @@ setup(
     author='Rafid Mahmood',
     author_email='rafid.mahmood@mail.utoronto.ca',
     url='https://github.com/rafidrm/invo',
-    download_url='https://github.com/rafidrm/invo/archive/0.4.1.tar.gz',
+    download_url='https://github.com/rafidrm/invo/archive/0.5.tar.gz',
     license='MIT',
     packages=['invo', 'invo.LinearModels', 'invo.utils'],
     keywords=['optimization', 'inverse'],
