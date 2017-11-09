@@ -1,0 +1,633 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>invo.LinearModels package &mdash; invo 0.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="invo 0.2 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> invo
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">invo.LinearModels package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-invo.LinearModels.AbsoluteDualityGap">invo.LinearModels.AbsoluteDualityGap module</a></li>
+<li><a class="reference internal" href="#module-invo.LinearModels.RelativeDualityGap">invo.LinearModels.RelativeDualityGap module</a></li>
+<li><a class="reference internal" href="#module-invo.LinearModels.pNorm">invo.LinearModels.pNorm module</a></li>
+<li><a class="reference internal" href="#module-invo.LinearModels">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">invo</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>invo.LinearModels package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/source/invo.LinearModels.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="invo-linearmodels-package">
+<h1>invo.LinearModels package<a class="headerlink" href="#invo-linearmodels-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-invo.LinearModels.AbsoluteDualityGap">
+<span id="invo-linearmodels-absolutedualitygap-module"></span><h2>invo.LinearModels.AbsoluteDualityGap module<a class="headerlink" href="#module-invo.LinearModels.AbsoluteDualityGap" title="Permalink to this headline">¶</a></h2>
+<p>Absolute Duality Gap Inverse Optimization</p>
+<p>The absolute duality gap method for inverse optimization minimizes the aggregate
+duality gap between the primal and dual objective values for each observed
+decision. The problem is formulated as follows</p>
+<div class="math">
+<p><img src="../_images/math/0adf057ecf517eca5637e779690c4a5f356aab48.png" alt="\min_{\mathbf{c, y},\epsilon_1, \dots, \epsilon_Q} \quad  &amp; \sum_{q=1}^Q | \epsilon_q |
+
+     \text{s.t.}\quad\quad  &amp; \mathbf{A'y = c}
+
+     &amp; \mathbf{c'\hat{x}_q = b'y} + \epsilon_q, \quad \forall q
+
+     &amp; \| \mathbf{c} \|_1 = 1
+
+     &amp; \mathbf{y \geq 0}"/></p>
+</div><dl class="class">
+<dt id="invo.LinearModels.AbsoluteDualityGap.AbsoluteDualityGap">
+<em class="property">class </em><code class="descclassname">invo.LinearModels.AbsoluteDualityGap.</code><code class="descname">AbsoluteDualityGap</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.AbsoluteDualityGap.AbsoluteDualityGap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Formulate an Absolute Duality Gap method of GMIO.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tol</strong> (<em>int</em>) &#8211; Sets number of significant digits. Default is 8.</li>
+<li><strong>verbose</strong> (<em>bool</em>) &#8211; Sets displays.  Default is False.</li>
+<li><strong>force_feasible_method</strong> (<em>bool</em>) &#8211; If set to True, then will enforce the hyperplane projection method regardless of feasible points. Default is False.</li>
+<li><strong>ban_constraints</strong> (<em>list</em>) &#8211; A list of constraint indices to force to zero when solving. Default is none.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>Suppose that the variables <code class="docutils literal"><span class="pre">A</span></code> and <code class="docutils literal"><span class="pre">b</span></code> are numpy matrices and <code class="docutils literal"><span class="pre">points</span></code> is
+a list of numpy arrays:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">AbsoluteDualityGap</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">FOP</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+<span class="nb">print</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="invo.LinearModels.AbsoluteDualityGap.AbsoluteDualityGap.FOP">
+<code class="descname">FOP</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.AbsoluteDualityGap.AbsoluteDualityGap.FOP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a forward optimization problem.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>A</strong> (<em>matrix</em>) &#8211; numpy matrix of shape <img class="math" src="../_images/math/55036d06602a3daaf6de91da943df71f45a345cf.png" alt="m \times n"/>.</li>
+<li><strong>b</strong> (<em>matrix</em>) &#8211; numpy matrix of shape <img class="math" src="../_images/math/9dec59647c86d47d149df09df24d72b084661be1.png" alt="m \times 1"/>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Currently, the forward problem is constructed by the user supplying a
+constraint matrix <code class="docutils literal"><span class="pre">A</span></code> and vector <code class="docutils literal"><span class="pre">b</span></code>. The forward problem is</p>
+<div class="math">
+<p><img src="../_images/math/e7b422268fad0ef80299786cfe417208c5dd165c.png" alt="\min_{\mathbf{x}} \quad&amp;\mathbf{c'x}
+
+\text{s.t} \quad&amp;\mathbf{A x \geq b}"/></p>
+</div></dd></dl>
+
+<dl class="method">
+<dt id="invo.LinearModels.AbsoluteDualityGap.AbsoluteDualityGap.rho">
+<code class="descname">rho</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.AbsoluteDualityGap.AbsoluteDualityGap.rho" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solves the goodness of fit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="invo.LinearModels.AbsoluteDualityGap.AbsoluteDualityGap.solve">
+<code class="descname">solve</code><span class="sig-paren">(</span><em>points</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.AbsoluteDualityGap.AbsoluteDualityGap.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solves the inverse optimization problem.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>points</strong> (<em>list</em>) &#8211; list of numpy arrays, denoting the (optimal) observed points.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the optimal value of the inverse optimization problem.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">error (float)</td>
+</tr>
+</tbody>
+</table>
+<p>First check if all of the points are feasible, in which case we can
+just project the points to each of the hyperplanes. Let <img class="math" src="../_images/math/56618fed8e2e4959294a3d553f7cd52e8b3e0fef.png" alt="\bar{x}"/>
+denote the centroid of the points. Then, we just solve</p>
+<div class="math">
+<p><img src="../_images/math/5bf383724487b24934ee1eff9e561e2742ea9243.png" alt="\min_{i \in \mathcal{M}} \left\{ \frac{\mathbf{a_i'\bar{x} - }b_i }{\| \mathbf{a_i} \|_1} \right\}"/></p>
+</div><p>Let <img class="math" src="../_images/math/4cfd45ee9976c6e13a1d7aa6aba866506ddeb9c4.png" alt="i^*"/> denote the optimal index. The optimal cost and dual
+variables are</p>
+<div class="math">
+<p><img src="../_images/math/5de72bb2f64d2b271223882be3465eaa84fcc353.png" alt="\mathbf{c^*} &amp;= \mathbf{\frac{a_{i^*}}{\|a_{i^*}\|}}
+
+\mathbf{y^*} &amp;= \mathbf{\frac{e_{i^*}}{\|a_{i^*}\|}}"/></p>
+</div><p>If not all of the points are feasible, then we need to solve an
+exponential number of optimization problems. Let <img class="math" src="../_images/math/f46f3d78c1b8c35daa2a307c9e205a6629802662.png" alt="\mathcal{C}^+, \mathcal{C}^- \subseteq \{ 1, \dots, n \}"/>
+be a partition of the index set of length <code class="docutils literal"><span class="pre">n</span></code>. For each possible
+partition, we solve the following problem</p>
+<div class="math">
+<p><img src="../_images/math/60b83507e14b1c07e280a4ff54f2865c3ee9fca3.png" alt="\min_{\mathbf{c, y}, \epsilon_1,\dots,\epsilon_Q} \quad  &amp; \sum_{q=1}^Q | \epsilon_q |
+
+\text{s.t.} \quad  &amp; \mathbf{A'y = c}
+
+&amp; \mathbf{c'\hat{x}_q = b'y} + \epsilon_q, \quad \forall q
+
+&amp; \sum_{i \in \mathcal{C}^+} c_i + \sum_{i \in \mathcal{C}^-} c_i = 1
+
+&amp; c_i \geq 0, \quad i \in \mathcal{C}^+
+
+&amp; c_i \leq 0, \quad i \in \mathcal{C}^-
+
+&amp; \mathbf{y \geq 0}"/></p>
+</div></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-invo.LinearModels.RelativeDualityGap">
+<span id="invo-linearmodels-relativedualitygap-module"></span><h2>invo.LinearModels.RelativeDualityGap module<a class="headerlink" href="#module-invo.LinearModels.RelativeDualityGap" title="Permalink to this headline">¶</a></h2>
+<p>Relative Duality Gap Inverse Optimization</p>
+<p>The relative duality gap uses the ratio of the primal objective value over the
+dual objective value of the forward problem  as the measure of sub-optimality.
+This inverse optimization problem is formulated as</p>
+<div class="math">
+<p><img src="../_images/math/5b682c4ad7809d2d85b19ddd39666c2aa4ccf715.png" alt="\min_{\mathbf{c, y},\epsilon_1, \dots, \epsilon_Q} \quad  &amp; \sum_{q=1}^Q | \epsilon_q - 1 |
+
+\text{s.t.}\quad\quad  &amp; \mathbf{A'y = c}
+
+&amp; \mathbf{c'\hat{x}_q = b'y} \epsilon_q
+
+&amp; \| \mathbf{c} \|_1 = 1
+
+&amp; \mathbf{y \geq 0}"/></p>
+</div><dl class="class">
+<dt id="invo.LinearModels.RelativeDualityGap.RelativeDualityGap">
+<em class="property">class </em><code class="descclassname">invo.LinearModels.RelativeDualityGap.</code><code class="descname">RelativeDualityGap</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.RelativeDualityGap.RelativeDualityGap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Formulate an Absolute Duality Gap method of generalized linear inverse
+optimization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tol</strong> (<em>int</em>) &#8211; Sets number of significant digits. Default is 8.</li>
+<li><strong>verbose</strong> (<em>bool</em>) &#8211; Sets displays.  Default False.</li>
+<li><strong>ban_constraints</strong> (<em>list</em>) &#8211; A list of constraint indices to force to zero when solving. Default is none.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>Suppose that the variables <code class="docutils literal"><span class="pre">A</span></code> and <code class="docutils literal"><span class="pre">b</span></code> are numpy matrices and <code class="docutils literal"><span class="pre">points</span></code> is
+a list of numpy arrays:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">RelativeDualityGap</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">FOP</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+<span class="nb">print</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="invo.LinearModels.RelativeDualityGap.RelativeDualityGap.FOP">
+<code class="descname">FOP</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.RelativeDualityGap.RelativeDualityGap.FOP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a forward optimization problem.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>A</strong> (<em>matrix</em>) &#8211; numpy matrix of shape <img class="math" src="../_images/math/55036d06602a3daaf6de91da943df71f45a345cf.png" alt="m \times n"/>.</li>
+<li><strong>b</strong> (<em>matrix</em>) &#8211; numpy matrix of shape <img class="math" src="../_images/math/9dec59647c86d47d149df09df24d72b084661be1.png" alt="m \times 1"/>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Currently, the forward problem is constructed by the user supplying a
+constraint matrix <code class="docutils literal"><span class="pre">A</span></code> and vector <code class="docutils literal"><span class="pre">b</span></code>. The forward problem is</p>
+<div class="math">
+<p><img src="../_images/math/e7b422268fad0ef80299786cfe417208c5dd165c.png" alt="\min_{\mathbf{x}} \quad&amp;\mathbf{c'x}
+
+\text{s.t} \quad&amp;\mathbf{A x \geq b}"/></p>
+</div></dd></dl>
+
+<dl class="method">
+<dt id="invo.LinearModels.RelativeDualityGap.RelativeDualityGap.rho">
+<code class="descname">rho</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.RelativeDualityGap.RelativeDualityGap.rho" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solves the goodness of fit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="invo.LinearModels.RelativeDualityGap.RelativeDualityGap.solve">
+<code class="descname">solve</code><span class="sig-paren">(</span><em>points</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.RelativeDualityGap.RelativeDualityGap.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solves the inverse optimization problem.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>points</strong> (<em>list</em>) &#8211; list of numpy arrays, denoting the (optimal) observed points.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the optimal value of the inverse optimization problem.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">error (float)</td>
+</tr>
+</tbody>
+</table>
+<p>To solve a relative duality gap problem, we solve the three following
+optimization problems.</p>
+<div class="math">
+<p><img src="../_images/math/7aeee7af4ebb5c1854d63f7f0e3e98c17ff64dec.png" alt="\min_{\mathbf{c, y},\epsilon_1, \dots, \epsilon_Q} \quad  &amp; \sum_{q=1}^Q | \epsilon_q - 1 |
+
+\text{s.t.}\quad\quad  &amp; \mathbf{A'y = c}
+
+&amp; \mathbf{c'\hat{x}_q = } \epsilon_q
+
+&amp; \mathbf{b'y} = 1
+
+&amp; \mathbf{y \geq 0}"/></p>
+</div><div class="math">
+<p><img src="../_images/math/a8274eae0314f3735a77da118c56df8fd0f6e742.png" alt="\min_{\mathbf{c, y},\epsilon_1, \dots, \epsilon_Q} \quad  &amp; \sum_{q=1}^Q | \epsilon_q - 1 |
+
+\text{s.t.}\quad\quad  &amp; \mathbf{A'y = c}
+
+&amp; \mathbf{c'\hat{x}_q = } -\epsilon_q
+
+&amp; \mathbf{b'y} = -1
+
+&amp; \mathbf{y \geq 0}"/></p>
+</div><div class="math">
+<p><img src="../_images/math/e1fd17f8a736de551002f8d0d88dd10b37883f96.png" alt="\min_{\mathbf{c, y},\epsilon_1, \dots, \epsilon_Q} \quad  &amp; 0
+
+\text{s.t.}\quad\quad  &amp; \mathbf{A'y = c}
+
+&amp; \mathbf{c'\hat{x}_q =} 0
+
+&amp; \mathbf{b'y} = 0
+
+&amp; \mathbf{y'1} = 0
+
+&amp; \mathbf{y \geq 0}"/></p>
+</div><p>The optimal value of the relative duality gap problem is equal to the
+optimal value of the minimum of these problems. Let <img class="math" src="../_images/math/96d65a2ab06119ec058097051c31cd8ed15e2c76.png" alt="\mathbf{\hat{c}, \hat{y}}"/>
+denote the optimal solution of that corresponding problem. Then, the
+optimal solution of the relative duality gap problem is</p>
+<div class="math">
+<p><img src="../_images/math/34e2e9cfaef961666b1593f66f547ffe75955439.png" alt="\mathbf{c^*} &amp;= \mathbf{\frac{\hat{c}}{\|\hat{c}\|_1}}
+
+\mathbf{y^*} &amp;= \mathbf{\frac{\hat{y}}{\|\hat{c}\|_1}}"/></p>
+</div></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-invo.LinearModels.pNorm">
+<span id="invo-linearmodels-pnorm-module"></span><h2>invo.LinearModels.pNorm module<a class="headerlink" href="#module-invo.LinearModels.pNorm" title="Permalink to this headline">¶</a></h2>
+<p>Decision Space Inverse Optimization with a p-norm.</p>
+<p>These models measure error in the space of decision variables, rather than
+objective values. In particular, these models aim to identify a cost vector that
+induces optimal decisions for the forward problem that are of minimum aggregate
+distance to the corresponding observed decisions. Any norm can be used in the
+decision space, but the key distinction is that the imputed optimal decisions
+must be feasible for the forward problem. A decision space inverse optimization
+problem is formulated as</p>
+<div class="math">
+<p><img src="../_images/math/aee90acf0200b4746b4534435cf790c93d38bdb7.png" alt="\min_{\mathbf{c, y}, \boldsymbol{ \epsilon_1,} \dots, \boldsymbol{ \epsilon_Q }} \quad  &amp; \sum_{q=1}^Q \| \boldsymbol{\epsilon_q} \|
+
+\text{s.t.}\quad\quad  &amp; \mathbf{A'y = c}
+
+&amp; \mathbf{c'\hat{x}_q = b'y} + \boldsymbol{\epsilon_q}, \quad \forall q
+
+&amp; \mathbf{A ( \hat{x}_q -} \boldsymbol{ \epsilon_q } \mathbf{ ) \geq b}
+
+&amp; \| \mathbf{c} \|_1 = 1
+
+&amp; \mathbf{y \geq 0}"/></p>
+</div><dl class="class">
+<dt id="invo.LinearModels.pNorm.pNorm">
+<em class="property">class </em><code class="descclassname">invo.LinearModels.pNorm.</code><code class="descname">pNorm</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.pNorm.pNorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Formulate a Decision Space (p-norm) method of GMIO.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tol</strong> (<em>int</em>) &#8211; Sets number of significant digits. Default is 8.</li>
+<li><strong>p</strong> (<em>int</em>) &#8211; Sets p for lp norm. Can be integer or &#8216;inf&#8217;. Default is 2.</li>
+<li><strong>verbose</strong> (<em>bool</em>) &#8211; Sets displays.  Default is False.</li>
+<li><strong>ban_constraints</strong> (<em>list</em>) &#8211; A list of constraint indices to force to zero when solving. Default is none.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>Suppose that the variables <code class="docutils literal"><span class="pre">A</span></code> and <code class="docutils literal"><span class="pre">b</span></code> are numpy matrices and <code class="docutils literal"><span class="pre">points</span></code> is
+a list of numpy arrays:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">pNorm</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">FOP</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+<span class="nb">print</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="invo.LinearModels.pNorm.pNorm.FOP">
+<code class="descname">FOP</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.pNorm.pNorm.FOP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a forward optimization problem.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>A</strong> (<em>matrix</em>) &#8211; numpy matrix of shape <img class="math" src="../_images/math/55036d06602a3daaf6de91da943df71f45a345cf.png" alt="m \times n"/>.</li>
+<li><strong>b</strong> (<em>matrix</em>) &#8211; numpy matrix of shape <img class="math" src="../_images/math/9dec59647c86d47d149df09df24d72b084661be1.png" alt="m \times 1"/>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Currently, the forward problem is constructed by the user supplying a
+constraint matrix <cite>A</cite> and vector <cite>b</cite>. The forward problem is</p>
+<div class="math">
+<p><img src="../_images/math/e7b422268fad0ef80299786cfe417208c5dd165c.png" alt="\min_{\mathbf{x}} \quad&amp;\mathbf{c'x}
+
+\text{s.t} \quad&amp;\mathbf{A x \geq b}"/></p>
+</div></dd></dl>
+
+<dl class="method">
+<dt id="invo.LinearModels.pNorm.pNorm.optimal_points">
+<code class="descname">optimal_points</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.pNorm.pNorm.optimal_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the projected optimal points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>points</strong> (<em>list</em>) &#8211; list of numpy arrays, denoting the observed points.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of numpy arrays denoting the imputed optimal points.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">truePoints (list)</td>
+</tr>
+</tbody>
+</table>
+<p>Once an inverse optimization problem is solved and the forward model is
+completed, you can take a collection of observed data points and get
+the &#8216;imputed&#8217; optimal points.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="invo.LinearModels.pNorm.pNorm.rho">
+<code class="descname">rho</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.pNorm.pNorm.rho" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solves the goodness of fit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="invo.LinearModels.pNorm.pNorm.solve">
+<code class="descname">solve</code><span class="sig-paren">(</span><em>points</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#invo.LinearModels.pNorm.pNorm.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solves the inverse optimization problem.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>points</strong> (<em>list</em>) &#8211; list of numpy arrays, denoting the (optimal) observed points.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the optimal value of the inverse optimization problem.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">error (float)</td>
+</tr>
+</tbody>
+</table>
+<p>To solve a decision space inverse optimization problem, we solve the
+following convex problem for every constraint</p>
+<div class="math">
+<p><img src="../_images/math/877e18ae5cd3d557565efdb93f9c6b24b392beb3.png" alt="\min_{\boldsymbol{ \epsilon_1,} \dots, \boldsymbol{ \epsilon_Q }} \quad  &amp; \sum_{q=1}^Q \| \boldsymbol{\epsilon_q} \|_p
+
+\text{s.t.} \quad\quad  &amp; \mathbf{ a_i'(x_q - }\boldsymbol{\epsilon_q}\mathbf{)} = b_i
+
+&amp; \mathbf{ A ( x_q - }\boldsymbol{\epsilon_q}\mathbf{) \geq b}"/></p>
+</div></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-invo.LinearModels">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-invo.LinearModels" title="Permalink to this headline">¶</a></h2>
+<p>Inverse optimization for Linear Models</p>
+<p>This module contains a collection of linear inverse optimization models. It
+includes the ones covered by generalized inverse optimization, including the
+absolute and relative duality gap, and p-norm methods. As we add new models,
+we should include them in the __main__ file.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Rafid Mahmood.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
